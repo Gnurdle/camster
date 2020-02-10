@@ -1,0 +1,14 @@
+;; shadow-cljs configuration
+{:source-paths
+ ["src/dev"
+  "src/main"
+  "src/test"]
+
+ :dependencies
+ [[funcool/promesa "5.1.0"]
+  [binaryage/oops "0.7.0"]]
+
+ :builds
+ {:app {:main camster.core/main
+        :target :node-script
+        :output-to "out/camster.js" }}}
