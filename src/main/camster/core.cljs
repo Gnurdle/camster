@@ -40,12 +40,17 @@
     (fs/closeSync tmpfd)
     
     ;; run ffmpeg
-    (let [args ["-f" "concat" "-safe" "0" "-i" tmpname 
+    (let [args ["-f" "concat" "-y" "-safe" "0" "-i" tmpname
                 "-c:v" "libx264" "-vf" "fps=25"
                 (path/join cam-root outfile)]
           pr (child-process/spawnSync "ffmpeg" (clj->js args) (clj->js {:stdio "inherit"}))]
+
       ;; scrub temp file
-      ((.-removeCallback tmpobj)))))
+      ((.-removeCallback tmpobj))
+
+      ;; propogate error
+      (when-let [err (.-error pr)]
+        (throw (ex-info "ffmpeg failed" err))))))
 
 (defn main
   "turn all but the last images directory into a single video apiece"
