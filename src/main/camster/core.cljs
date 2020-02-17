@@ -6,11 +6,11 @@
    ["path" :as path]
    ["child_process" :as child-process]))
 
-(def ^:private cam-root "/net/cam")
+#_ (def ^:private cam-root "/net/cam")
 
 (defn ^:private cannonical-image-dir
   "cannonical path of images directory given a top-level date-stamp"
-  [entry]
+  [cam-root entry]
   (path/join cam-root entry "images"))
 
 (defn ^:private read-dir-matching
@@ -27,7 +27,7 @@
 
 (defn ^:private create-video
   "convert all the jpgs in a given image-dir to a movie"
-  [outfile image-dir]
+  [cam-root outfile image-dir]
   (println "outfile: " outfile "image-dir: " image-dir)
   (let [images (map (fn [ent] (path/join image-dir ent)) (images-in-dir image-dir))
         tmpobj (tmp/fileSync)
@@ -54,16 +54,18 @@
 
 (defn main
   "turn all but the last images directory into a single video apiece"
-  [& _]
+  [& cam-roots]
   (println "[camster]")
-  (let [todo-dirs (->> (read-dir-matching cam-root #"[0-9]{8}")
-                       (sort)
-                       (butlast))]
-    (doseq [todo-dir todo-dirs]
-      (println "starting: " todo-dir)
-      (let [image-path (cannonical-image-dir todo-dir)
-            todo-path (path/join cam-root todo-dir)]
-        (create-video (str "daily-" todo-dir ".mp4") image-path)
-        (del/sync todo-path (clj->js {:force true}))))
-    (println "camster is out...")))
+  (doseq [cam-root (map path/resolve cam-roots)]
+    (println "start processing for: " cam-root)
+    (let [todo-dirs (->> (read-dir-matching cam-root #"[0-9]{8}")
+                         (sort)
+                         (butlast))]
+      (doseq [todo-dir todo-dirs]
+        (println "starting: " todo-dir)
+        (let [image-path (cannonical-image-dir cam-root todo-dir)
+              todo-path (path/join cam-root todo-dir)]
+          (create-video cam-root (str "daily-" todo-dir ".mp4") image-path)
+          (del/sync todo-path (clj->js {:force true}))))
+      (println "camster is out..."))))
 
