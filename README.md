@@ -12,6 +12,6 @@ It's a very simple clojurescript project, using node's affordances to interact w
 
 Might be useful either as an example, or hacked for your situation.
 
-First time I contemplated using cljs over python for such chores - mostly to see of things went
+First time I contemplated using cljs over python for such chores - mostly to see how things went
 
 uses https://github.com/zeit/ncc to bundle all the dependencies so that a single node script can be deployed
